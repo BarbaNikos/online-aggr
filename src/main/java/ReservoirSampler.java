@@ -26,4 +26,26 @@ public class ReservoirSampler {
     }
     return reservoir;
   }
+  
+  public static double[] sample(int n, double[] collection) {
+    float k = ((float) n) / (float) collection.length;
+    return sample(k, collection);
+  }
+  
+  public static double[] sample(float k, double[] collection) {
+    if (k <= 0.0f || k > 1.0f)
+      throw new IllegalArgumentException("reservoir percentage invalid");
+    int reservoirSize = (int) (((float) collection.length) * k);
+    double[] reservoir = new double[reservoirSize];
+    int i;
+    for (i = 0; i < reservoirSize; ++i)
+      reservoir[i] = collection[i];
+    for (; i < collection.length; ++i) {
+      int j = ThreadLocalRandom.current().nextInt(i + 1);
+      if (j < reservoirSize) {
+        reservoir[j] = collection[i];
+      }
+    }
+    return reservoir;
+  }
 }
