@@ -3,19 +3,18 @@ package window;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * @author Nikos R. Katsipoulakis (nick.katsip@gmail.com)
  */
-public class WindowLevelQuery<Tuple, Result> {
+public class WindowLevelQuery<Tuple> {
   private long range;
   
   private long slide;
   
   private long paneLevelQueryRange;
   
-  private ArrayList<PaneLevelQuery<Tuple, Result>> buffer;
+  private ArrayList<PaneLevelQuery<Tuple>> buffer;
   
   public WindowLevelQuery(long range, long slide) {
     this.range = range;
@@ -24,14 +23,14 @@ public class WindowLevelQuery<Tuple, Result> {
     buffer = new ArrayList<>();
   }
   
-  public Collection<PaneLevelQuery<Tuple, Result>> add(long timestamp, Tuple tuple) {
+  public Collection<PaneLevelQuery<Tuple>> add(long timestamp, Tuple tuple) {
     if (buffer.isEmpty()) {
       buffer.add(new PaneLevelQuery<>(timestamp - paneLevelQueryRange, timestamp));
       buffer.get(0).add(tuple);
     }
-    // search to see if it can be placed somewhere
+    // search to see if it can be placed somewhere of the existing PLQs
     boolean inserted = false;
-    for (PaneLevelQuery<Tuple, Result> plq : buffer) {
+    for (PaneLevelQuery<Tuple> plq : buffer) {
       if (timestamp >= plq.start && timestamp <= plq.end) {
         inserted = true;
         plq.add(tuple);
@@ -53,8 +52,10 @@ public class WindowLevelQuery<Tuple, Result> {
       buffer.add(new PaneLevelQuery<>(newStart, newEnd));
       buffer.get(buffer.size() - 1).add(tuple);
       long oldestEndTimestamp = buffer.get(0).end;
+      // if the addition of the new tuple is causing eviction of previous PLQs
+      // (i.e., timestamp - oldestEndTimestamp > range)
       if (oldestEndTimestamp < timestamp - range) {
-        List<PaneLevelQuery<Tuple, Result>> evicted = new ArrayList<>();
+        List<PaneLevelQuery<Tuple>> evicted = new ArrayList<>();
         while (true) {
           if (buffer.get(0).end < timestamp - range) {
             evicted.add(buffer.remove(0));

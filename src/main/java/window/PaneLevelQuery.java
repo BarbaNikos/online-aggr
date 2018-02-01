@@ -1,12 +1,11 @@
 package window;
 
 import java.util.Collection;
-import java.util.function.Function;
 
 /**
  * @author Nikos R. Katsipoulakis (nick.katsip@gmail.com)
  */
-public class PaneLevelQuery<Tuple, Result> {
+public class PaneLevelQuery<Tuple> {
   long start;
   
   long end;
