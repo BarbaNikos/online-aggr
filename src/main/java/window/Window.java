@@ -74,6 +74,7 @@ public class Window<T> {
       // this will generate multiple windows
       
     }
+    return null;
   }
   
   public List<List<Pane<T>>> add(long timestamp, T tuple) {
